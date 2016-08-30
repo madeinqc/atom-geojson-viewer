@@ -4,5 +4,16 @@
 // for a full listing of what's available.
 @import "ui-variables";
 
+// Import mapbox style
+@import (inline) "/Users/madeinqc/projects/atom-geojson-viewer/plugin/node_modules/mapbox.js/theme/style.css";
+
 .atom-geojson-viewer {
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:100%;
+}
+
+.atom-geojson-viewer.leaflet-container {
+  background-color: transparent;
 }

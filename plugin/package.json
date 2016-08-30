@@ -2,14 +2,19 @@
   "name": "atom-geojson-viewer",
   "main": "./lib/atom-geojson-viewer",
   "version": "0.0.0",
-  "description": "A short description of your package",
+  "description": "A geojson viewer based on leaflet.",
   "keywords": [
+    "geojson", "map"
   ],
-  "repository": "https://github.com/atom/atom-geojson-viewer",
+  "repository": "https://github.com/madeinqc/atom-geojson-viewer",
+  "bugs": {
+    "url": "https://github.com/madeinqc/atom-geojson-viewer/issues"
+  },
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
+    "mapbox.js": "2.4.x"
   }
 }
