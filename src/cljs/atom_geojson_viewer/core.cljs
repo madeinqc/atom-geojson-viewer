@@ -24,12 +24,20 @@
 (swap! disposables conj subscriptions)
 
 (defn toggle []
-  (let [promise (.open workspace "atom-geojson-viewer://test"
-                    (clj->js {:split "right"
-                              :searchAllPanes true}))]
+  (let [active-editor (.getActiveTextEditor workspace)
+        _ (/ 1 0)
+        text (.getSelectedText active-editor)
+        text (if text
+                text
+                (.getText active-editor))
+        geojson (.parse js/JSON text)
+        promise (.open workspace "atom-geojson-viewer://test"
+                  (clj->js {:split "right"
+                            :searchAllPanes true}))]
     (.done promise
       (fn [atom-geojson-viewer]
-        (.initialise atom-geojson-viewer)))))
+        (.initialise atom-geojson-viewer)
+        (.loadGeojson atom-geojson-viewer geojson)))))
 
 ;; Dispose all disposables
 (defn deactivate []

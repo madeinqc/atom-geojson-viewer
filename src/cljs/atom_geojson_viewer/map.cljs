@@ -23,4 +23,7 @@
     @.title)
 
   (defn initialise []
-    ((.. js/window -L -mapbox -map) "atom-geojson-viewer" "mapbox.dark")))
+    (set! @.map ((.. js/window -L -mapbox -map) "atom-geojson-viewer" "mapbox.dark")))
+
+  (defn loadGeojson [data]
+    (.setGeoJSON (.. @.map -featureLayer) data)))
