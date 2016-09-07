@@ -25,19 +25,34 @@
 
 (defn toggle []
   (let [active-editor (.getActiveTextEditor workspace)
-        _ (/ 1 0)
         text (.getSelectedText active-editor)
-        text (if text
-                text
-                (.getText active-editor))
+        full-editor (empty? text)
+        text (if full-editor
+                (.getText active-editor)
+                text)
         geojson (.parse js/JSON text)
-        promise (.open workspace "atom-geojson-viewer://test"
+        url-hash (if full-editor
+                  (str (.-id active-editor))
+                  (str (.-id active-editor)
+                       "/"
+                       (hash (str text (.getPath active-editor)))))
+        _ (println "Opening URL: " (str "atom-geojson-viewer://" url-hash))
+        promise (.open workspace (str "atom-geojson-viewer://" url-hash)
                   (clj->js {:split "right"
                             :searchAllPanes true}))]
+    ; TODO Clean that part and move to map everything that have to do with the state or events
     (.done promise
       (fn [atom-geojson-viewer]
         (.initialise atom-geojson-viewer)
-        (.loadGeojson atom-geojson-viewer geojson)))))
+        (when (.full-editor? atom-geojson-viewer)
+          (.onDidStopChanging active-editor
+            (fn []
+              (let [new-text (.getText active-editor)
+                    new-geojson (.parse js/JSON new-text)]
+                (.load-geojson atom-geojson-viewer new-geojson)))))))
+    (.then promise
+      (fn [atom-geojson-viewer]
+        (.load-geojson atom-geojson-viewer geojson)))))
 
 ;; Dispose all disposables
 (defn deactivate []
@@ -55,11 +70,16 @@
     (.addOpener workspace
       (fn [uri]
         (let [parsed-uri (.parse url uri)
-              pathname (.-pathname parsed-uri)
+              editor-id (.-hostname parsed-uri)
               protocol (.-protocol parsed-uri)
-              pathname (when pathname (js/decodeURI pathname))]
+              pathname (.-pathname parsed-uri)
+              map-hash (str editor-id
+                        (when (not (empty? pathname))
+                          "" pathname))
+              title (str "GeoJSON Viewer: " map-hash)
+              _ (println protocol editor-id pathname)]
           (when (= protocol "atom-geojson-viewer:")
-            (Map. (str protocol "//" pathname) "Marc"))))))
+            (Map. uri title map-hash))))))
 
   (.add subscriptions
     (.add commands "atom-workspace" "atom-geojson-viewer:toggle" toggle)))

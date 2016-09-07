@@ -11,19 +11,28 @@
 (def mapbox (node/require "mapbox.js"))
 
 (defclass Map
-  (defn constructor [title geojson]
+  (defn constructor [uri title map-hash geojson]
+    (set! @.uri uri)
     (set! @.title title)
+    (set! @.map-hash map-hash)
+    (set! @.full-editor (= (.indexOf map-hash "\\") -1))
     (when geojson (set! @.geojson geojson))
     (set! @.element
       (html-string->dom
-        (html [:div#atom-geojson-viewer.atom-geojson-viewer])))
+        (str "<div id='" map-hash "' class='atom-geojson-viewer'></div>")))
     (set! (.. js/window -L -mapbox -accessToken) "pk.eyJ1IjoibWFkZWlucWMiLCJhIjoiY2lzZ3JncThtMDAwZzJ0bHMzNXVhc3I3MyJ9.j-3EBlxCyqXlzTNLRY5y6w"))
 
   (defn getTitle []
     @.title)
 
-  (defn initialise []
-    (set! @.map ((.. js/window -L -mapbox -map) "atom-geojson-viewer" "mapbox.dark")))
+  (defn getURI []
+    @.uri)
 
-  (defn loadGeojson [data]
+  (defn full-editor? []
+    @.full-editor)
+
+  (defn initialise []
+    (set! @.map ((.. js/window -L -mapbox -map) @.map-hash "mapbox.dark")))
+
+  (defn load-geojson [data]
     (.setGeoJSON (.. @.map -featureLayer) data)))
